@@ -18,7 +18,7 @@ jobs:
       - name: Start 24/7 Stream
         run: |
           # Stream video asset on loop for ~5 hours (18000 seconds)
-          timeout 18000 ffmpeg -re -stream_loop -1 -i "https://github.com/perkinslewis/doomstew-radio/releases/download/v1.0/Doom.Stew.Radio.-.Coming.Soon.mp4" \
+          timeout 18000 ffmpeg -re -stream_loop -1 -i "https://github.com/perkinslewis/doomstew-radio/releases/download/v1.0/DoomStewRadio_ComingSoon.mp4" \
           -c:v libx264 -preset ultrafast -b:v 3000k -maxrate 3000k -bufsize 6000k \
           -pix_fmt yuv420p -g 50 -c:a aac -b:a 128k -ar 44100 \
           -f flv "rtmp://a.rtmp.youtube.com/live2/${{ secrets.YOUTUBE_STREAM_KEY }}" || true
