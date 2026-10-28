@@ -1,0 +1,33 @@
+name: 24/7 Doom Stew Radio Broadcaster
+
+on:
+  schedule:
+    # Triggers every 5 hours automatically as a fail-safe
+    - cron: '0 */5 * * *'
+  workflow_dispatch: # Allows manual start button
+
+jobs:
+  stream:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Install FFmpeg
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y ffmpeg
+
+      - name: Start 24/7 Stream
+        run: |
+          # Stream video asset on loop for ~5 hours (18000 seconds)
+          timeout 18000 ffmpeg -re -stream_loop -1 -i "https://github.com/perkinslewis/doomstew-radio/releases/download/v1.0/Doom.Stew.Radio.-.Coming.Soon.mp4" \
+          -c:v libx264 -preset ultrafast -b:v 3000k -maxrate 3000k -bufsize 6000k \
+          -pix_fmt yuv420p -g 50 -c:a aac -b:a 128k -ar 44100 \
+          -f flv "rtmp://a.rtmp.youtube.com/live2/${{ secrets.YOUTUBE_STREAM_KEY }}" || true
+
+      - name: Auto-Trigger Next Loop
+        if: always()
+        run: |
+          curl -X POST \
+            -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+            -H "Accept: application/vnd.github.v3+json" \
+            https://api.github.com/repos/${{ github.repository }}/actions/workflows/stream.yml/dispatches \
+            -d '{"ref":"main"}'
